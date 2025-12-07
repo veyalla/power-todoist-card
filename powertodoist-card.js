@@ -1,5 +1,5 @@
-console.info("POWERTODOIST: Loading...");
-import {LitElement, html, css} from "https://unpkg.com/lit-element@3.3.3/lit-element.js?module";
+console.info("POWERTODOIST: Loading... v3");
+import {LitElement, html, css} from "https://esm.sh/lit@3.1.0";
 
 // TODO: register with HACS: https://hacs.xyz/docs/publish/start
 
