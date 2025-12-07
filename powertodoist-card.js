@@ -140,33 +140,6 @@ class PowerTodoistCardEditor extends LitElement {
 
     valueChanged(e) {
         if (
-            !this.config
-            || !this.hass
-            || (this[`_${e.target.configValue}`] === e.target.value)
-        ) {
-            return;
-        }
-
-        if (e.target.configValue) {
-            if (e.target.value === '') {
-                if (!['entity', 'show_completed'].includes(e.target.configValue)) {
-                    delete this.config[e.target.configValue];
-                }
-            } else {
-                this.config = {
-                    ...this.config,
-                    [e.target.configValue]: e.target.checked !== undefined
-                        ? e.target.checked
-                        : this.isNumeric(e.target.value) ? parseFloat(e.target.value) : e.target.value,
-                };
-            }
-        }
-
-        this.configChanged(this.config);
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------------
@@ -181,30 +154,6 @@ class PowerTodoistCardEditor extends LitElement {
         if (!this.hass) {
             return html``;
         }
-
-        const entities = this.getEntitiesByType('sensor');
-        const completedCount = [...Array(16).keys()];
-
-        return html`<div class="card-config">
-            <div class="option">
-                <ha-select
-                    naturalMenuWidth
-                    fixedMenuPosition
-                    label="Entity (required)"
-                    @selected=${this.valueChanged}
-                    @closed=${(event) => event.stopPropagation()}
-                    .configValue=${'entity'}
-                    .value=${this._entity}
-                >
-                    ${entities.map(entity => {
-            return html`<mwc-list-item .value="${entity}">${entity}</mwc-list-item>`;
-        })}
-                </ha-select>
-            </div>
-
-            <div class="option">
-                <ha-select
-                    naturalMenuWidth
                     fixedMenuPosition
                     label="Number of completed tasks shown at the end of the list (0 to disable)"
                     @selected=${this.valueChanged}
