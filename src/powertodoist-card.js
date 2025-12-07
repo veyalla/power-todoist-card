@@ -46,6 +46,17 @@ function replaceMultiple(str2Replace, mapReplaces, was, input) {
     });
 }
 
+const SCHEMA = [
+    { name: "entity", required: true, selector: { entity: { domain: "sensor" } } },
+    { name: "show_completed", selector: { number: { min: 0, max: 15, mode: "box" } } },
+    { name: "show_header", selector: { boolean: {} } },
+    { name: "show_item_add", selector: { boolean: {} } },
+    { name: "use_quick_add", selector: { boolean: {} } },
+    { name: "show_item_close", selector: { boolean: {} } },
+    { name: "show_item_delete", selector: { boolean: {} } },
+    { name: "filter_today_overdue", selector: { boolean: {} } },
+];
+
 class PowerTodoistCardEditor extends LitElement {
     static get properties() {
         return {
@@ -54,270 +65,42 @@ class PowerTodoistCardEditor extends LitElement {
         };
     }
 
-    get _entity() {
-        if (this.config) {
-            return this.config.entity || '';
-        }
-
-        return '';
-    }
-
-    get _show_completed() {
-        if (this.config) {
-            return (this.config.show_completed !== undefined) ? this.config.show_completed : 5;
-        }
-
-        return 5;
-    }
-
-    get _show_header() {
-        if (this.config) {
-            return this.config.show_header || true;
-        }
-
-        return true;
-    }
-
-    get _show_item_add() {
-        if (this.config) {
-            return this.config.show_item_add || true;
-        }
-
-        return true;
-    }
-
-    get _use_quick_add() {
-        if (this.config) {
-            return this.config.use_quick_add || false;
-        }
-
-        return false;
-    }
-
-    get _show_item_close() {
-        if (this.config) {
-            return this.config.show_item_close || true;
-        }
-
-        return true;
-    }
-
-    get _show_item_delete() {
-        if (this.config) {
-            return this.config.show_item_delete || true;
-        }
-
-        return true;
-    }
-
-    get _filter_today_overdue() {
-        if (this.config) {
-            return this.config.filter_today_overdue || false;
-        }
-
-        return false;
-    }
-
     setConfig(config) {
         this.config = config;
     }
 
-    configChanged(config) {
-        const e = new Event('config-changed', {
-            bubbles: true,
-            composed: true,
-        });
-
-        e.detail = { config: config };
-
-        this.dispatchEvent(e);
+    _valueChanged(ev) {
+        const config = ev.detail.value;
+        this.dispatchEvent(new CustomEvent("config-changed", { detail: { config } }));
     }
 
-    getEntitiesByType(type) {
-        return this.hass
-            ? Object.keys(this.hass.states).filter(entity => entity.substr(0, entity.indexOf('.')) === type)
-            : [];
-    }
-
-    isNumeric(v) {
-        return !isNaN(parseFloat(v)) && isFinite(v);
-    }
-
-    valueChanged(e) {
-        if (
-            !this.config
-            || !this.hass
-            || (this[`_${e.target.configValue}`] === e.target.value)
-        ) {
-            return;
-        }
-
-        if (e.target.configValue) {
-            if (e.target.value === '') {
-                if (!['entity', 'show_completed'].includes(e.target.configValue)) {
-                    delete this.config[e.target.configValue];
-                }
-            } else {
-                this.config = {
-                    ...this.config,
-                    [e.target.configValue]: e.target.checked !== undefined
-                        ? e.target.checked
-                        : this.isNumeric(e.target.value) ? parseFloat(e.target.value) : e.target.value,
-                };
-            }
-        }
-
-        this.configChanged(this.config);
-    }
-
-    entityChanged(e) {
-        const newValue = e.detail.value;
-        if (!this.config || !this.hass || this._entity === newValue) {
-            return;
-        }
-        this.config = {
-            ...this.config,
-            entity: newValue,
+    _computeLabel(schema) {
+        const labels = {
+            entity: "Entity (required)",
+            show_completed: "Completed tasks shown (0 to disable)",
+            show_header: "Show header",
+            show_item_add: "Show add item input",
+            use_quick_add: "Use Quick Add",
+            show_item_close: "Show close/complete buttons",
+            show_item_delete: "Show delete buttons",
+            filter_today_overdue: "Only show today or overdue",
         };
-        this.configChanged(this.config);
+        return labels[schema.name] || schema.name;
     }
-
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
-    // -----------------------------------------------------------------------------------------------------------------------
 
     render() {
-        if (!this.hass) {
+        if (!this.hass || !this.config) {
             return html``;
         }
 
-        const completedCount = [...Array(16).keys()];
-
-        return html`<div class="card-config">
-            <ha-entity-picker
+        return html`
+            <ha-form
                 .hass=${this.hass}
-                .value=${this._entity}
-                .includeDomains=${['sensor']}
-                .label=${'Entity (required)'}
-                @value-changed=${this.entityChanged}
-                allow-custom-entity
-            ></ha-entity-picker>
-
-            <div class="option">
-                <ha-select
-                    naturalMenuWidth
-                    fixedMenuPosition
-                    label="Number of completed tasks shown at the end of the list (0 to disable)"
-                    @selected=${this.valueChanged}
-                    @closed=${(event) => event.stopPropagation()}
-                    .configValue=${'show_completed'}
-                    .value=${this._show_completed}
-                >
-                    ${completedCount.map(count => {
-                        return html`<mwc-list-item .value="${count}">${count}</mwc-list-item>`;
-                    })}
-                </ha-select>
-            </div>
-            
-            <div class="option">
-                <ha-switch
-                    .checked=${(this.config.show_header === undefined) || (this.config.show_header !== false)}
-                    .configValue=${'show_header'}
-                    @change=${this.valueChanged}
-                >
-                </ha-switch>
-                <span>Show header</span>
-            </div>
-
-            <div class="option">
-                <ha-switch
-                    .checked=${(this.config.show_item_add === undefined) || (this.config.show_item_add !== false)}
-                    .configValue=${'show_item_add'}
-                    @change=${this.valueChanged}
-                >
-                </ha-switch>
-                <span>Show text input element for adding new items to the list</span>
-            </div>
-
-            <div class="option">
-                <ha-switch
-                    .checked=${(this.config.use_quick_add !== undefined) && (this.config.use_quick_add !== false)}
-                    .configValue=${'use_quick_add'}
-                    @change=${this.valueChanged}
-                >
-                </ha-switch>
-                <span>
-                    Use the <a target="_blank" href="https://todoist.com/help/articles/task-quick-add">Quick Add</a> implementation, available in the official Todoist clients
-                </span>
-            </div>
-            <div class="option" style="font-size: 0.7rem; margin: -12px 0 0 45px">
-                <span>
-                    Check your <a target="_blank" href="https://github.com/grinstantin/todoist-card#using-the-card">configuration</a> before using this option
-                </span>
-            </div>
-
-            <div class="option">
-                <ha-switch
-                    .checked=${(this.config.show_item_close === undefined) || (this.config.show_item_close !== false)}
-                    .configValue=${'show_item_close'}
-                    @change=${this.valueChanged}
-                >
-                </ha-switch>
-                <span>Show "close/complete" and "uncomplete" buttons</span>
-            </div>
-
-            <div class="option">
-                <ha-switch
-                    .checked=${(this.config.show_item_delete === undefined) || (this.config.show_item_delete !== false)}
-                    .configValue=${'show_item_delete'}
-                    @change=${this.valueChanged}
-                >
-                </ha-switch>
-                <span>Show "delete" buttons</span>
-            </div>
-
-            <div class="option">
-                <ha-switch
-                    .checked=${(this.config.filter_today_overdue !== undefined) && (this.config.filter_today_overdue !== false)}
-                    .configValue=${'filter_today_overdue'}
-                    @change=${this.valueChanged}
-                >
-                </ha-switch>
-                <span>Only show today or overdue</span>
-            </div>
-        </div>`;
-    }
-
-    static get styles() {
-        return css`
-            .card-config {
-                padding: 16px;
-            }
-
-            .card-config ha-entity-picker,
-            .card-config ha-select {
-                width: 100%;
-                display: block;
-                margin-bottom: 16px;
-            }
-
-            .option {
-                display: flex;
-                align-items: center;
-                padding: 5px;
-            }
-
-            .option ha-switch {
-                margin-right: 10px;
-            }
+                .data=${this.config}
+                .schema=${SCHEMA}
+                .computeLabel=${this._computeLabel}
+                @value-changed=${this._valueChanged}
+            ></ha-form>
         `;
     }
 }
