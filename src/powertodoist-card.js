@@ -170,6 +170,18 @@ class PowerTodoistCardEditor extends LitElement {
         this.configChanged(this.config);
     }
 
+    entityChanged(e) {
+        const newValue = e.detail.value;
+        if (!this.config || !this.hass || this._entity === newValue) {
+            return;
+        }
+        this.config = {
+            ...this.config,
+            entity: newValue,
+        };
+        this.configChanged(this.config);
+    }
+
     // -----------------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------------
@@ -187,24 +199,19 @@ class PowerTodoistCardEditor extends LitElement {
             return html``;
         }
 
-        const entities = this.getEntitiesByType('sensor');
         const completedCount = [...Array(16).keys()];
 
         return html`<div class="card-config">
             <div class="option">
-                <ha-select
-                    naturalMenuWidth
-                    fixedMenuPosition
-                    label="Entity (required)"
-                    @selected=${this.valueChanged}
-                    @closed=${(event) => event.stopPropagation()}
-                    .configValue=${'entity'}
+                <ha-entity-picker
+                    .hass=${this.hass}
                     .value=${this._entity}
-                >
-                    ${entities.map(entity => {
-                        return html`<mwc-list-item .value="${entity}">${entity}</mwc-list-item>`;
-                    })}
-                </ha-select>
+                    .configValue=${'entity'}
+                    @value-changed=${this.entityChanged}
+                    .includeDomains=${['sensor']}
+                    allow-custom-entity
+                    label="Entity (required)"
+                ></ha-entity-picker>
             </div>
 
             <div class="option">
