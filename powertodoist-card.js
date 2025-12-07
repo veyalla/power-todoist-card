@@ -1,3 +1,4 @@
+console.info("POWERTODOIST: Loading...");
 import {LitElement, html, css} from "https://unpkg.com/lit-element@3.3.3/lit-element.js?module";
 
 // TODO: register with HACS: https://hacs.xyz/docs/publish/start
@@ -1410,6 +1411,10 @@ dateFormat.i18n = {
 };
 
 // For convenience...
-Date.prototype.format = function (mask, utc) {
-    return dateFormat(this, mask, utc);
-};
+try {
+    Date.prototype.format = function (mask, utc) {
+        return dateFormat(this, mask, utc);
+    };
+} catch (e) {
+    console.warn("PowerTodoist: Could not patch Date.prototype.format", e);
+}
