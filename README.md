@@ -1,3 +1,6 @@
+---
+feature: thumbnails/external/afca113bf148f53c820f7fae84bebcdc.svg
+---
 # PowerTodoist Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)

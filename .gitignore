@@ -1,0 +1,14 @@
+# Secrets and sensitive configs
+config/*secret*
+config/*.key
+config/*.pem
+config/*.token
+
+# Local state
+*.db
+*.log
+.DS_Store
+
+# Beads local cache
+.beads/*.db
+.beads/*.db-*
