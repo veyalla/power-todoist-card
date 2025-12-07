@@ -12,3 +12,7 @@ config/*.token
 # Beads local cache
 .beads/*.db
 .beads/*.db-*
+
+# Node.js
+node_modules/
+package-lock.json
