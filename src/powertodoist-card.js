@@ -202,17 +202,14 @@ class PowerTodoistCardEditor extends LitElement {
         const completedCount = [...Array(16).keys()];
 
         return html`<div class="card-config">
-            <div class="option">
-                <ha-entity-picker
-                    .hass=${this.hass}
-                    .value=${this._entity}
-                    .configValue=${'entity'}
-                    @value-changed=${this.entityChanged}
-                    .includeDomains=${['sensor']}
-                    allow-custom-entity
-                    label="Entity (required)"
-                ></ha-entity-picker>
-            </div>
+            <ha-entity-picker
+                .hass=${this.hass}
+                .value=${this._entity}
+                .includeDomains=${['sensor']}
+                .label=${'Entity (required)'}
+                @value-changed=${this.entityChanged}
+                allow-custom-entity
+            ></ha-entity-picker>
 
             <div class="option">
                 <ha-select
@@ -301,16 +298,23 @@ class PowerTodoistCardEditor extends LitElement {
 
     static get styles() {
         return css`
+            .card-config {
+                padding: 16px;
+            }
+
+            .card-config ha-entity-picker,
             .card-config ha-select {
                 width: 100%;
+                display: block;
+                margin-bottom: 16px;
             }
-            
+
             .option {
                 display: flex;
                 align-items: center;
                 padding: 5px;
             }
-            
+
             .option ha-switch {
                 margin-right: 10px;
             }
