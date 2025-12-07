@@ -35,53 +35,6 @@ Just search for `PowerTodoist Card` in the HACS list or click the badge below:
       ```
 4. Add `custom:powertodoist-card` to Lovelace UI as any other card (using either editor or YAML configuration).
 
-## Using the card
-
-This card can be configured using Lovelace UI editor.
-
-1. Add the following code to `configuration.yaml`:
-    ```yaml
-    sensor:
-      - name: To-do List
-        platform: rest
-        method: GET
-        resource: 'https://api.todoist.com/sync/v9/projects/get_data'
-        params:
-          project_id: TODOIST_PROJECT_ID
-        headers:
-          Authorization: !secret todoist_api_token
-        value_template: '{{ value_json[''project''][''id''] }}'
-        json_attributes:
-          - project
-          - items
-          - sections
-          - project_notes
-        scan_interval: 30
-        
-    command_line:
-      - sensor:
-          name: label_colors
-          command: !secret todoist_cmd_with_api_token
-          value_template: >
-            {{ value_json.label_colors | length }}
-          json_attributes:
-            - label_colors
-          scan_interval: 200
-
-    rest_command:
-      todoist:
-        method: post
-        url: 'https://api.todoist.com/sync/v9/{{ url }}'
-        payload: '{{ payload }}'
-        headers:
-          Authorization: !secret todoist_api_token
-        content_type: 'application/x-www-form-urlencoded'
-    ```
-    👉 The REST command and the `label_colors` sensor are constant and need to be defined only once for each Todoist account used (I recommend using only one and handling any content separation with cleverly filtered projects, sections, and labels).
-    
-    👉 The Sensor definition, on the other hand, can be cloned to allow for different projects, just make sure you set a unique entity name, and set the appropriate `TODOIST_PROJECT_ID` for each one (see below).
-2. In that `configuration.yaml`, replace `TODOIST_PROJECT_ID` with ID of your selected Todoist project.
-    > You can get `TODOIST_PROJECT_ID` from project URL after logging in to your Todoist account in a browser. It usually looks like this:
           `https://todoist.com/app/project/**TODOIST_PROJECT_ID**` or `https://todoist.com/app/project/name_of_project-**TODOIST_PROJECT_ID**`
 3. Add this to `secrets.yaml`:
     ```yaml
